@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface Surah {
@@ -44,8 +45,10 @@ export default function Home() {
         <ul className="list-disc pl-5">
           {surahs.map((surah) => (
             <li key={surah.nomor} className="mb-2">
-              <span className="font-semibold">{surah.nama_latin}</span> -{' '}
-              {surah.arti} ({surah.jumlah_ayat} ayat)
+              <Link href={`/surat/${surah.nomor}`}>
+                <span className="font-semibold">{surah.nama_latin}</span> -{' '}
+                {surah.arti} ({surah.jumlah_ayat} ayat)
+              </Link>
             </li>
           ))}
         </ul>
