@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const SuratPage = ({ surat_id }: { surat_id: string }) => {
+const SuratPage = ({ juz_id }: { juz_id: string }) => {
   const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -11,9 +11,11 @@ const SuratPage = ({ surat_id }: { surat_id: string }) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `https://quran.ppqita.my.id/api/quran?page=${surat_id}&token=TADABBUR_EMAILKU`
+          `https://quran.ppqita.my.id/api/quran?juz=${juz_id}&token=TADABBUR_EMAILKU`
         );
         const result = await response.json();
+        console.log('result: ', result);
+
         setData(result);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -23,7 +25,7 @@ const SuratPage = ({ surat_id }: { surat_id: string }) => {
     };
 
     fetchData();
-  }, [surat_id]);
+  }, [juz_id]);
 
   if (loading) return <p>Loading...</p>;
   if (!data) return <p>No data found</p>;
