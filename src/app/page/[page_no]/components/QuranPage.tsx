@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import localFont from 'next/font/local';
+import { addData, getDataById } from '@/lib/db-api';
 
 const lpmqFont = localFont({
   src: '../../../../fonts/LPMQ.ttf',
@@ -65,11 +66,23 @@ const SuratPage = ({ page_no }: { page_no: string }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `https://quran.ppqita.my.id/api/quran?mushafPage=${page_no}&token=TADABBUR_EMAILKU`
-        );
-        const result = await response.json();
-        console.log('result: ', result);
+        // ambil data di indexdb
+        let result = await getDataById(page_no);
+
+        if (!result || !result.data) {
+          // jika tidak ada, maka mengambil data quran dari api
+          const response = await fetch(
+            `https://quran.ppqita.my.id/api/quran?mushafPage=${page_no}&token=TADABBUR_EMAILKU`
+          );
+          const resData: ApiResponse = await response.json();
+          result = { id: page_no, data: resData.data };
+
+          // simpan data di indexdb
+          await addData(result);
+        }
+
+        console.log('result: ', result.data);
+
         result.data.forEach(({ surah, ayat }: { surah: Surah; ayat: Ayat }) => {
           const surahName = surah.nama_latin; // Misalnya: "An-Naba'", "An-Nas"
 
