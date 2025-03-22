@@ -110,7 +110,7 @@ const SuratPage = ({ page_no }: { page_no: string }) => {
               return (
                 <div key={ayat.number.inQuran}>
                   {ayat.number.inSurah === 1 && <div>Bismillah</div>}
-                  <div>
+                  <div className={`${lpmqFont.className}`}>
                     ({ayat.number.inSurah}) {ayat.arab}
                   </div>
                 </div>
