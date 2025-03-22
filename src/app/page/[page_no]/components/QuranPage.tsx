@@ -102,18 +102,18 @@ const SuratPage = ({ page_no }: { page_no: string }) => {
 
   return (
     <div className="p-8">
-      {Object.entries(mapSurat).map(([slug, surah]) => (
+      {Object.entries(mapSuratUpdate).map(([slug, surah]) => (
         <li key={slug} className="border p-3 rounded shadow">
           {surah.nomor}. {surah.nama_latin}
           <div>
             {mapAyatUpdate[slug].map((ayat: Ayat) => {
               return (
-                <>
+                <div key={ayat.number.inQuran}>
                   {ayat.number.inSurah === 1 && <div>Bismillah</div>}
-                  <div key={ayat.number.inQuran}>
+                  <div>
                     ({ayat.number.inSurah}) {ayat.arab}
                   </div>
-                </>
+                </div>
               );
             })}
           </div>
