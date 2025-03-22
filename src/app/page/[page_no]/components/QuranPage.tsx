@@ -2,10 +2,65 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import localFont from 'next/font/local';
+
+const lpmqFont = localFont({
+  src: '../../../../fonts/LPMQ.ttf',
+  variable: '--font-lpmq',
+});
+
+// Struktur untuk Surah
+interface Surah {
+  nomor: number;
+  nama: string;
+  nama_latin: string;
+  jumlah_ayat: number;
+}
+
+// Struktur untuk Ayat
+interface Ayat {
+  number: {
+    inQuran: number;
+    inSurah: number;
+  };
+  arab: string;
+  translation: string;
+  meta: {
+    juz: number;
+    page: number;
+    manzil: number;
+    ruku: number;
+    hizbQuarter: number;
+    sajda: {
+      recommended: boolean;
+      obligatory: boolean;
+    };
+  };
+  latin: string;
+}
+
+// Data JSON yang akan diproses
+interface ApiResponse {
+  status: string;
+  data: {
+    surah: Surah;
+    ayat: Ayat;
+  }[];
+}
+
+// Menggunakan Record untuk menyimpan mapping
+type MapSurat = Record<string, Surah>;
+type MapAyat = Record<string, Ayat[]>;
+
+// Inisialisasi Record
+const mapSurat: MapSurat = {};
+const mapAyat: MapAyat = {};
 
 const SuratPage = ({ page_no }: { page_no: string }) => {
   const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mapAyatUpdate, setMapAyatUpdate] = useState<MapAyat>({});
+  const [mapSuratUpdate, setMapSuratUpdate] = useState<MapSurat>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,8 +70,23 @@ const SuratPage = ({ page_no }: { page_no: string }) => {
         );
         const result = await response.json();
         console.log('result: ', result);
+        result.data.forEach(({ surah, ayat }: { surah: Surah; ayat: Ayat }) => {
+          const surahName = surah.nama_latin; // Misalnya: "An-Naba'", "An-Nas"
 
+          // Simpan data surat jika belum ada
+          if (!mapSurat[surahName]) {
+            mapSurat[surahName] = surah;
+          }
+
+          // Simpan data ayat berdasarkan nama surat
+          if (!mapAyat[surahName]) {
+            mapAyat[surahName] = [];
+          }
+          mapAyat[surahName].push(ayat);
+        });
         setData(result);
+        setMapAyatUpdate(mapAyat);
+        setMapSuratUpdate(mapSurat);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -32,22 +102,23 @@ const SuratPage = ({ page_no }: { page_no: string }) => {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold">
-        Surah {data.data[0]?.surah.nama_latin}
-      </h1>
-      <p className="text-lg">Total Ayat: {data.data[0]?.surah.jumlah_ayat}</p>
-      <div className="mt-4 space-y-4">
-        {data.data.map((item: any) => (
-          <div
-            key={item.ayat.number.inQuran}
-            className="border p-4 rounded-lg shadow"
-          >
-            <p className="text-right text-2xl font-arabic">{item.ayat.arab}</p>
-            <p className="text-sm italic">{item.ayat.latin}</p>
-            <p className="text-base">{item.ayat.translation}</p>
+      {Object.entries(mapSurat).map(([slug, surah]) => (
+        <li key={slug} className="border p-3 rounded shadow">
+          {surah.nomor}. {surah.nama_latin}
+          <div>
+            {mapAyatUpdate[slug].map((ayat: Ayat) => {
+              return (
+                <>
+                  {ayat.number.inSurah === 1 && <div>Bismillah</div>}
+                  <div key={ayat.number.inQuran}>
+                    ({ayat.number.inSurah}) {ayat.arab}
+                  </div>
+                </>
+              );
+            })}
           </div>
-        ))}
-      </div>
+        </li>
+      ))}
     </div>
   );
 };
